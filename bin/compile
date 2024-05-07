@@ -24,8 +24,8 @@ if [ -f "${ENV_DIR}/APP_BASE" ]; then
     if [ -f "${BUILD_DIR}/${APP_BASE}/.heroku/build.sh" ]; then
         echo "Running ${APP_BASE}/.heroku/build.sh" | indent
         (
-            cd "${BUILD_DIR}/${APP_BASE}"
-            bash .heroku/build.sh
+            cd "${BUILD_DIR}"
+            bash "${APP_BASE}/.heroku/build.sh"
         )
 
         if [ $? -ne 0 ]; then
