@@ -16,40 +16,35 @@ STAGE="$(mktemp -d)"
 if [ -f "${ENV_DIR}/APP_BASE" ]; then
     APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 
-    (
-        mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
-        rm -rf "${BUILD_DIR}"/* &&
-        mv "${STAGE}/$(basename "$APP_BASE")"/* "${BUILD_DIR}"
-    )
+    # Check whether APP_BASE/.heroku/build.sh exists
+    if [ -f "${BUILD_DIR}/${APP_BASE}/.heroku/build.sh" ]; then
+        echo "Running ${APP_BASE}/.heroku/build.sh" | indent
+        (
+            cd "${BUILD_DIR}/${APP_BASE}"
+            bash .heroku/build.sh
+        )
 
-    if [ $? -ne 0 ]; then
-        echo "FAILED to copy directory into place" | indent
-        exit 1
-    fi
+        if [ $? -ne 0 ]; then
+            echo "FAILED to run ${APP_BASE}/.heroku/build.sh" | indent
+            exit 1
+        fi
+    # Otherwise copy the directory into place
+    else
+        echo "No ${APP_BASE}/.heroku/build.sh found, copying directory into place" | indent
 
-    echo "Copied ${APP_BASE} to root of app successfully" | indent
-    exit 0 
-fi
+        (
+            mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
+            rm -rf "${BUILD_DIR}"/* &&
+            mv "${STAGE}/$(basename "$APP_BASE")"/* "${BUILD_DIR}"
+        )
 
+        if [ $? -ne 0 ]; then
+            echo "FAILED to copy directory into place" | indent
+            exit 1
+        fi
 
-# Logic from: https://github.com/heroku/heroku-buildpack-multi-procfile
-PROCFILE=$(cat "${ENV_DIR}/PROCFILE")
-
-if ! [[ -z "${PROCFILE}" ]]; then
-    cp "${BUILD_DIR}/${PROCFILE}" "${BUILD_DIR}/Procfile"
-
-    if ! [ $? ]; then
-        echo "FAILED to copy a Procfile" | indent
-        exit 1
-    fi
-
-    echo "Copied ${PROCFILE} as Procfile successfully" | indent
-
-    APP_DIR=$(dirname "${BUILD_DIR}/${PROCFILE}")
-
-    if [[ -f "${APP_DIR}/app.json" ]]; then
-        cp "${APP_DIR}/app.json" "${BUILD_DIR}/app.json"
-        echo "Copied ${APP_DIR}/app.json as app.json successfully" | indent
+        echo "Copied ${APP_BASE} to root of app successfully" | indent
+        exit 0
     fi
 fi
 
