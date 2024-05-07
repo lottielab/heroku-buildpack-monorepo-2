@@ -12,9 +12,13 @@ CACHE_DIR="$2"
 ENV_DIR="$3"
 STAGE="$(mktemp -d)"
 
+echo "Initializing monorepo build environment" | indent
+
 # Logic from: https://github.com/lstoll/heroku-buildpack-monorepo
 if [ -f "${ENV_DIR}/APP_BASE" ]; then
     APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
+
+    echo "APP_BASE set to ${APP_BASE}" | indent
 
     # Check whether APP_BASE/.heroku/build.sh exists
     if [ -f "${BUILD_DIR}/${APP_BASE}/.heroku/build.sh" ]; then
@@ -46,5 +50,8 @@ if [ -f "${ENV_DIR}/APP_BASE" ]; then
         echo "Copied ${APP_BASE} to root of app successfully" | indent
         exit 0
     fi
+else
+    echo "No APP_BASE found, leaving source files untouched" | indent
+    exit 0
 fi
 
