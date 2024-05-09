@@ -20,21 +20,21 @@ if [ -f "${ENV_DIR}/APP_BASE" ]; then
 
     echo "APP_BASE set to ${APP_BASE}" | indent
 
-    # Check whether APP_BASE/.heroku/build.sh exists
-    if [ -f "${BUILD_DIR}/${APP_BASE}/.heroku/build.sh" ]; then
-        echo "Running ${APP_BASE}/.heroku/build.sh" | indent
+    # Check whether APP_BASE/.heroku-deploy/build.sh exists
+    if [ -f "${BUILD_DIR}/${APP_BASE}/.heroku-deploy/build.sh" ]; then
+        echo "Running ${APP_BASE}/.heroku-deploy/build.sh" | indent
         (
             cd "${BUILD_DIR}"
-            bash "${APP_BASE}/.heroku/build.sh"
+            bash "${APP_BASE}/.heroku-deploy/build.sh"
         )
 
         if [ $? -ne 0 ]; then
-            echo "FAILED to run ${APP_BASE}/.heroku/build.sh" | indent
+            echo "FAILED to run ${APP_BASE}/.heroku-deploy/build.sh" | indent
             exit 1
         fi
     # Otherwise copy the directory into place
     else
-        echo "No ${APP_BASE}/.heroku/build.sh found, copying directory into place" | indent
+        echo "No ${APP_BASE}/.heroku-deploy/build.sh found, copying directory into place" | indent
 
         (
             mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
